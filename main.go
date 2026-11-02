@@ -3,7 +3,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"net/url"
 	"strings"
 
 	"example.com/{{project-name}}/internal/fluor/fun/handler"
@@ -91,7 +93,11 @@ func envelope(request handler.Request, requestID, field string, value any) map[s
 }
 
 func respond(status uint16, requestID string, payload map[string]any) cm.Result[handler.ResponseShape, handler.Response, handler.Error] {
-	body, _ := json.Marshal(payload)
+	var encoded bytes.Buffer
+	encoder := json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	_ = encoder.Encode(payload)
+	body := bytes.TrimRight(encoded.Bytes(), "\n")
 	headers := []handler.Header{{Name: "content-type", Value: "application/json"}}
 	if requestID != "" {
 		headers = append(headers, handler.Header{Name: "x-request-id", Value: requestID})
@@ -126,11 +132,20 @@ func queryParam(query cm.Option[string], key string) (string, bool) {
 	}
 	for _, part := range strings.Split(*text, "&") {
 		name, value, found := strings.Cut(part, "=")
-		if found && name == key {
-			return value, true
+		if !found || formDecode(name) != key {
+			continue
 		}
+		return formDecode(value), true
 	}
 	return "", false
+}
+
+func formDecode(value string) string {
+	decoded, err := url.QueryUnescape(value)
+	if err != nil {
+		return value
+	}
+	return decoded
 }
 
 func jsonStringField(body, field string) (string, bool) {
