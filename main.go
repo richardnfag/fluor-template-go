@@ -33,12 +33,17 @@ func handle(request handler.Request) cm.Result[handler.ResponseShape, handler.Re
 }
 
 func listItems(request handler.Request, requestID string) cm.Result[handler.ResponseShape, handler.Response, handler.Error] {
-	items := []map[string]string{{"name": "notebook"}, {"name": "pencil"}}
+	items := []map[string]string{
+		{"name": "notebook"},
+		{"name": "pencil"},
+	}
 	if name, ok := queryParam(request.Query, "name"); ok {
 		if name != "notebook" && name != "pencil" {
 			return failure(handler.ErrorCodeNotFound, "item "+name+" was not found")
 		}
-		items = []map[string]string{{"name": name}}
+		items = []map[string]string{
+			{"name": name},
+		}
 	}
 	return respond(200, requestID, envelope(request, requestID, "items", items))
 }
@@ -98,7 +103,9 @@ func respond(status uint16, requestID string, payload map[string]any) cm.Result[
 	encoder.SetEscapeHTML(false)
 	_ = encoder.Encode(payload)
 	body := bytes.TrimRight(encoded.Bytes(), "\n")
-	headers := []handler.Header{{Name: "content-type", Value: "application/json"}}
+	headers := []handler.Header{
+		{Name: "content-type", Value: "application/json"},
+	}
 	if requestID != "" {
 		headers = append(headers, handler.Header{Name: "x-request-id", Value: requestID})
 	}
