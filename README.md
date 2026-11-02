@@ -6,6 +6,7 @@ Starter template for a Fluor function in Go using TinyGo and `wit-bindgen-go`.
 
 - Go 1.24+
 - TinyGo 0.34+
+- `just`: `cargo install just`
 - `wit-bindgen-go`: `go get -tool go.bytecodealliance.org/cmd/wit-bindgen-go`
 - `wkg`: `cargo install wkg`
 - `wasm-tools`: `cargo install --locked wasm-tools`
